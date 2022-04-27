@@ -4,11 +4,9 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 
-# x = range(-10, 10, 2)
-x1 = np.linspace(0, 9, 10)
-x2 = np.linspace(0, 9, 10)
+x = np.linspace(-100, 200, 301).tolist()
 
-X, Y = np.meshgrid(x1, x2)
-print(X)
+
+print(x[])
 # plt.plot(x, y)
 # plt.show()
