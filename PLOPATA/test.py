@@ -4,12 +4,9 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 
-# x = range(-10, 10, 2)
-x = np.linspace(0, 9, 10).tolist()
-y = []
-for i in x:
-    y.append(i*2 + 3)
+x = np.linspace(-100, 200, 301).tolist()
 
-print(f"{y[x.index(4)]}")
+
+print(x[])
 # plt.plot(x, y)
 # plt.show()
