@@ -7,6 +7,6 @@ import matplotlib.pyplot as plt
 x = np.linspace(-100, 200, 301).tolist()
 
 
-print(x[])
+# print(x[])
 # plt.plot(x, y)
 # plt.show()
