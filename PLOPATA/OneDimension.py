@@ -54,10 +54,10 @@ for i in range(1, 100, 1):
 
 x = np.linspace(1, 100, 99).tolist()
 
-plt.title("Average error per hit position")
+plt.title("Average error vs hit position")
 plt.scatter(x, err)
 plt.xlabel("x[um]")
-plt.ylabel("avg error")
+plt.ylabel("avg error[um]")
 # plt.legend()
 plt.show()
 
