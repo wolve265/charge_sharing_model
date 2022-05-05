@@ -2,6 +2,7 @@ import math
 import numpy as np
 from scipy.stats import norm
 from scipy import special
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
@@ -17,8 +18,8 @@ def calc_probabilities(y, pixel_dim):
     return PI, PII, PIII
 
 
-def OneD_calc_hit(mean, electron_count, pixel_dim):
-    sig = 35
+def OneD_calc_hit(mean, sig, electron_count, pixel_dim):
+    # pixel_dim * 0.35
 
     y = norm.rvs(mean, sig, electron_count)
 
@@ -33,43 +34,64 @@ def OneD_calc_hit(mean, electron_count, pixel_dim):
         x0 = -sig * math.sqrt(2) * special.erfinv(2*PI - 1)
     else:
         x0 = sig * math.sqrt(2) * special.erfinv(2*PIII - 1) + pixel_dim
-    return x0
+    return x0, y
 
-
-# mean = 1
-# sig = 35
 electron_count = 2200
-pixel_dim = 100
-avg_nr = 50
+pixel_dim = 75
+mean = 70
+sig = pixel_dim * 0.35
 
-err = []
-for i in range(1, 100, 1):
-    x_sum = 0
-    mean = i
-    for j in range(avg_nr):
-        x_temp = OneD_calc_hit(mean, electron_count,  pixel_dim)
-        x_sum += x_temp
-    x_avg = x_sum/avg_nr
-    err.append(abs(x_avg - mean))
+x0, y = OneD_calc_hit(mean, sig, electron_count, pixel_dim)
+x = np.linspace(-pixel_dim, 2*pixel_dim, 3*pixel_dim + 1)
+print(f"{x0=}")
+print(f"{sig=}")
 
-x = np.linspace(1, 100, 99).tolist()
+fig_size = 40
 
-plt.title("Average error vs hit position")
-plt.scatter(x, err)
-plt.xlabel("x[um]")
-plt.ylabel("avg error[um]")
-# plt.legend()
+mpl.rcParams['font.family'] = 'DejaVu Sans'
+# plt.rcParams['font.size'] = 10
+plt.rcParams['axes.linewidth'] = 2
+
+fig = plt.figure()
+ax = plt.axes()
+# Edit the major and minor ticks of the x and y axes
+ax.xaxis.set_tick_params(which='major', size=10, width=2, direction='in', top='on')
+ax.xaxis.set_tick_params(which='minor', size=7,  width=2, direction='in', top='on')
+ax.yaxis.set_tick_params(which='major', size=10, width=2, direction='in', right='on')
+ax.yaxis.set_tick_params(which='minor', size=7,  width=2, direction='in', right='on')
+# Edit the major and minor tick locations
+ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(50))
+ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
+ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(5))
+# Set the axis limits
+ax.set_xlim(-1.25*pixel_dim, 2.25*pixel_dim)
+ax.set_ylim(0, fig_size)
+# Add the x and y-axis labels
+ax.set_xlabel(f'Position (μm)',                 labelpad=5)
+ax.set_ylabel('Amount of electrons detected',   labelpad=5)
+
+plt.title(f"1D charge distribution.\n Real hit at {mean:2.3f} μm. Calculated hit at {x0:2.3f}μm")
+plt.hist(y, bins=len(x))
+plt.vlines(-pixel_dim, 0, fig_size,     colors="black")
+plt.vlines(0,    0, fig_size,           colors="black")
+plt.vlines(pixel_dim,  0, fig_size,     colors="black")
+plt.vlines(2*pixel_dim,  0, fig_size,   colors="black")
+plt.vlines(mean, 0, fig_size/2,         colors="red",   label="real hit position")
+plt.legend()
 plt.show()
 
-# plt.title("1D charge distribution")
+# plt.title(f"1D charge distribution.\n Real hit at {mean}um. Calculated hit at {x0:.3f}um")
 # plt.hist(y, bins=len(x))
-# plt.vlines(-100, 0, y.max()/5,  colors="black")
-# plt.vlines(0,    0, y.max()/5,  colors="black")
-# plt.vlines(100,  0, y.max()/5,  colors="black")
-# plt.vlines(200,  0, y.max()/5,  colors="black")
-# plt.vlines(mean, 0, 20,         colors="red",   label="mean")
-# plt.vlines(mean - 3*sig, 0, 20, colors="green", label="+-3sig")
-# plt.vlines(mean + 3*sig, 0, 20, colors="green")
+# plt.vlines(-100, 0, 30,  colors="black")
+# plt.vlines(0,    0, 30,  colors="black")
+# plt.vlines(100,  0, 30,  colors="black")
+# plt.vlines(200,  0, 30,  colors="black")
+# plt.vlines(mean, 0, 15,         colors="red",   label="hit position")
+# plt.vlines(mean - 3*sig, 0, 15, colors="green", label="+-3sig")
+# plt.vlines(mean + 3*sig, 0, 15, colors="green")
 # plt.xlabel("x[um]")
+# plt.ylabel("nr of electrons")
 # plt.legend()
 # plt.show()
+
