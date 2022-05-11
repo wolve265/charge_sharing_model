@@ -49,7 +49,7 @@ print(f"{sig=}")
 fig_size = 40
 
 mpl.rcParams['font.family'] = 'DejaVu Sans'
-# plt.rcParams['font.size'] = 10
+plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 2
 
 fig = plt.figure()
@@ -65,13 +65,13 @@ ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
 ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
 ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(5))
 # Set the axis limits
-ax.set_xlim(-1.25*pixel_dim, 2.25*pixel_dim)
+ax.set_xlim(-1*pixel_dim, 2*pixel_dim)
 ax.set_ylim(0, fig_size)
 # Add the x and y-axis labels
-ax.set_xlabel(f'Position (μm)',                 labelpad=5)
-ax.set_ylabel('Amount of electrons detected',   labelpad=5)
+ax.set_xlabel(f'Position (μm)',         labelpad=5, size=13)
+ax.set_ylabel('Number of electrons',    labelpad=5, size=13)
 
-plt.title(f"1D charge distribution.\n Real hit at {mean:2.3f} μm. Calculated hit at {x0:2.3f}μm")
+plt.title(f"1D charge distribution.\n Real hit at {mean:2.3f} μm. Calculated hit at {x0:2.3f}μm", size=14)
 plt.hist(y, bins=len(x))
 plt.vlines(-pixel_dim, 0, fig_size,     colors="black")
 plt.vlines(0,    0, fig_size,           colors="black")
