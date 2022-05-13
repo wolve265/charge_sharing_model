@@ -42,14 +42,14 @@ class Model:
         return x0
 
 
-real_hit = 70
+real_hit = 35
 pixel_dim = 75
 # nr_of_el = 2200
 
 E = 8000                        # 8keV
 Eeh = [3.62, 4.2, 4.43, 4.6]    # Electron-hole pair generation energy [Si, GaAs, CdTe, CZT]
 F = 0.1
-N = E/Eeh[0]
+N = E/Eeh[3]
 sigN = math.sqrt(F*N)
 nr_of_photons = 100
 

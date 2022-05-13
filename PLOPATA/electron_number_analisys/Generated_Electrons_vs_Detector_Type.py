@@ -11,7 +11,7 @@ photon_count = 1000000
 
 N = []
 sigN = []
-y= []
+y = []
 for material_energy in Eeh:
     N.append(E/material_energy)
     sigN.append(math.sqrt(F*N[-1]))
@@ -19,7 +19,7 @@ for material_energy in Eeh:
 
 plt.title(f"Number of electrons generated in different materials after {photon_count} hits")
 plt.boxplot(y, vert=0)
-plt.yticks([1,2,3,4], ["Si","GaAs", "CdTe", "CZT"])
+plt.yticks([1, 2, 3, 4], ["Si", "GaAs", "CdTe", "CZT"])
 plt.xlabel("Number of electrons")
 plt.show()
 
