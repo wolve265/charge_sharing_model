@@ -46,10 +46,10 @@ real_hit = 35
 pixel_dim = 75
 # nr_of_el = 2200
 
-E = 8000                        # 8keV
+E = [8000, 8000, 22000, 22000]  # 8keV or 22keV depending on detector material
 Eeh = [3.62, 4.2, 4.43, 4.6]    # Electron-hole pair generation energy [Si, GaAs, CdTe, CZT]
 F = 0.1
-N = E/Eeh[3]
+N = E[3]/Eeh[3]
 sigN = math.sqrt(F*N)
 nr_of_photons = 100
 
@@ -73,8 +73,8 @@ avg_std_error = stat.mean(stdev_function)
 # ----------------------------------------------------------------------------------------------------------------------
 
 fig, (ax2, ax3) = plt.subplots(1, 2)
-fig.suptitle(f"Electron nr analysis for Silicon. μ={real_hit}, σ={mod.sigma}, pixel size={pixel_dim}\n "
-             f"nr of iterations for each electron number = {nr_of_photons}")
+fig.suptitle(f"Electron nr analysis for CZT. μ={real_hit}, σ={mod.sigma}, pixel size={pixel_dim}\n "
+             f"Photon Energy = {E[3]}eV, nr of iterations for each electron number = {nr_of_photons}")
 
 # ax1.set_title("List of generated Electron Numbers")
 # ax1.set(xlabel="Iteration nr", ylabel="Number of electrons")
