@@ -53,6 +53,7 @@ class Model:
             x0 = self.sigma * math.sqrt(2) * special.erfinv(2 * PIII - 1) + self.pixel_dim
         return x0
 
+    # Model for fixed point data
     def OneD_calc_hit_int(self, mult):
         # pixel_dim * 0.35
         PSUM = self.PI + self.PII + self.PIII
