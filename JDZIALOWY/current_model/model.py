@@ -53,13 +53,13 @@ class Model:
             # x0 = self.sigma * math.sqrt(2) * special.erfinv(2 * PIII - 1) + self.pixel_dim
         return x_gauss
 
-    def create_gauss_list(self) :
+    def create_gauss_list(self):
         y = []
         pixel_bins = np.linspace(0, self.pixel_dim, self.list_size) # podzial pixela na czesci
         pixel_bin_size = pixel_bins[1] - pixel_bins[0] # najmniejszy krok podzialu
         cdf = norm.cdf(pixel_bins, 0, self.sigma) # dystrybuanta
 
-        for i in range(len(pixel_bins)) :
+        for i in range(len(pixel_bins)):
             y.append(1 - cdf[i])
 
         return y, pixel_bin_size
