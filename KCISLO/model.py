@@ -121,11 +121,11 @@ class PixelChargeSharingModel1D:
         index: int = 0
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            while(p1_pc < self.gauss_lut[index]) :
+            while(p1_pc < self.gauss_lut[index]):
                 index += 1
             calc_hit_pos = index*self.gauss_bin_size
         else:
-            while(p3_pc < self.gauss_lut[index]) :
+            while(p3_pc < self.gauss_lut[index]):
                 index += 1
             calc_hit_pos = self.pixel_size - index*self.gauss_bin_size
         return calc_hit_pos
@@ -156,6 +156,7 @@ class PixelChargeSharingModel1D:
             ax.vlines(line, 0, fig_size, colors="black")
         ax.vlines(self.hit_pos, 0, fig_size/2, colors="red", label="real hit position")
         ax.legend()
+
 
 class PixelChargeSharingModel2D:
     """
