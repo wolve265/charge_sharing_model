@@ -86,7 +86,7 @@ class PixelChargeSharingModel1D:
             result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
         return result
 
-    def calc_hit_1D_Taylor(self, order: int) -> float:
+    def calc_hit_1D_taylor(self, order: int = 10) -> float:
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3
         p1_pc = p1 / psum
@@ -111,7 +111,7 @@ class PixelChargeSharingModel1D:
         for i in range(len(pixel_bins)):
             self.gauss_lut.append(1 - cdf[i])
 
-    def calc_hit_1D_lut(self, lut_size: int) -> float:
+    def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
         self.create_gauss_lut(lut_size)
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3

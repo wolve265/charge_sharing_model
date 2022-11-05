@@ -4,7 +4,7 @@ import model
 if __name__ == "__main__":
     pixel_size = 75
     electrons_num = 2200
-    hit_pos = 50
+    hit_pos = 45
     fig_size = 40
 
     px_model = model.PixelChargeSharingModel1D(pixel_size)
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         print(f" {calc_hit_ideal=:.5f} μm")
 
         for order in [5]:
-            calc_hit_Taylor = px_model.calc_hit_1D_Taylor(order)
+            calc_hit_Taylor = px_model.calc_hit_1D_taylor(order)
             print(f"{calc_hit_Taylor=:.5f} μm ({order=})")
 
         for lut_size in [10000]:
