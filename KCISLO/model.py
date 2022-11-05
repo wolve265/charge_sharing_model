@@ -12,10 +12,10 @@ class PixelChargeSharingModel1D:
     """
     The one dimensional model of pixel charge sharing.
     """
-    def __init__(self, pixel_size: int):
+    def __init__(self, pixel_size: int, sigma: float = None):
         # Pixel params
         self.pixel_size = pixel_size
-        self.sigma: float = pixel_size * 0.35
+        self.sigma = sigma if sigma is not None else pixel_size * 0.35
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
         self.gauss_lut = []
