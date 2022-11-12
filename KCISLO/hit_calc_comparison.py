@@ -8,7 +8,7 @@ if __name__ == "__main__":
     fig_size = 40
 
     px_model = model.PixelChargeSharingModel1D(pixel_size)
-    print(f"{px_model.sigma=} μm")
+    print(f"{px_model.charge_cloud_sigma=} μm")
 
     for hit_pos in range(0, 75, 10):
         px_model.hit(hit_pos, electrons_num)

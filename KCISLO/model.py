@@ -13,10 +13,11 @@ class PixelChargeSharingModel1D:
     The one dimensional model of pixel charge sharing.
     """
 
-    def __init__(self, pixel_size: int, sigma: float = None):
+    def __init__(self, pixel_size: int, charge_cloud_sigma: float = None, noise_sigma: float = None):
         # Pixel params
         self.pixel_size = pixel_size
-        self.sigma = sigma if sigma is not None else pixel_size * 0.35
+        self.charge_cloud_sigma = charge_cloud_sigma if charge_cloud_sigma is not None else pixel_size * 0.35
+        self.noise_sigma = noise_sigma if noise_sigma is not None else None
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
         self.gauss_lut = []
@@ -40,7 +41,7 @@ class PixelChargeSharingModel1D:
     def hit(self, pos: int, electrons_num: int) -> None:
         self.hit_pos = pos
         self.electrons_num = electrons_num
-        self.charge_distribution = norm.rvs(self.hit_pos, self.sigma, self.electrons_num)
+        self.charge_distribution = norm.rvs(self.hit_pos, self.charge_cloud_sigma, self.electrons_num)
 
     def is_left(self, i: float) -> bool:
         return -self.pixel_size < i < 0
@@ -60,11 +61,20 @@ class PixelChargeSharingModel1D:
     def right(self) -> list[float]:
         return [i for i in self.charge_distribution if self.is_right(i)]
 
-    def get_probabilities(self) -> tuple[int, int, int]:
+    def get_probabilities(self) -> list[int]:
         p1: int = len(self.left())
         p2: int = len(self.mid())
         p3: int = len(self.right())
-        return p1, p2, p3
+        parts = [p1, p2, p3]
+        # print(parts)
+        if self.noise_sigma is None:
+            return parts
+        # Generate noise for each part. Unit in electrons RMS
+        new_parts = []
+        for p in parts:
+            new_parts.append(p + int(norm.rvs(0, self.noise_sigma, 1)[0]))
+        # print(new_parts)
+        return new_parts
 
     def calc_hit_1D_erfinv(self, **kwargs) -> float:
         p1, p2, p3 = self.get_probabilities()
@@ -75,9 +85,9 @@ class PixelChargeSharingModel1D:
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            calc_hit_pos = -self.sigma * math.sqrt(2) * special.erfinv(2 * p1_pc - 1)
+            calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p1_pc - 1)
         else:
-            calc_hit_pos = self.sigma * math.sqrt(2) * special.erfinv(2 * p3_pc - 1) + self.pixel_size
+            calc_hit_pos = self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p3_pc - 1) + self.pixel_size
         return calc_hit_pos
 
     def erfinv_Taylor(self, probability: float, aprox_order: int) -> float:
@@ -103,9 +113,9 @@ class PixelChargeSharingModel1D:
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            calc_hit_pos = -self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
+            calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
         else:
-            calc_hit_pos = self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order) + self.pixel_size
+            calc_hit_pos = self.charge_cloud_sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order) + self.pixel_size
         return calc_hit_pos
 
     def create_gauss_lut(self, size: int) -> None:
@@ -114,7 +124,7 @@ class PixelChargeSharingModel1D:
         self.gauss_lut = []
         pixel_bins = np.linspace(0, self.pixel_size, size) # podzial pixela na czesci
         self.gauss_bin_size = pixel_bins[1] - pixel_bins[0] # najmniejszy krok podzialu
-        cdf = norm.cdf(pixel_bins, 0, self.sigma) # dystrybuanta
+        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma) # dystrybuanta
 
         for i in range(len(pixel_bins)):
             self.gauss_lut.append(1 - cdf[i])
@@ -129,13 +139,15 @@ class PixelChargeSharingModel1D:
         index: int = 0
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            while(p1_pc < self.gauss_lut[index]):
-                index += 1
-            calc_hit_pos = index*self.gauss_bin_size
+            for i, value in enumerate(self.gauss_lut):
+                if p1_pc >= value:
+                    break
+            calc_hit_pos = i*self.gauss_bin_size
         else:
-            while(p3_pc < self.gauss_lut[index]):
-                index += 1
-            calc_hit_pos = self.pixel_size - index*self.gauss_bin_size
+            for i, value in enumerate(self.gauss_lut):
+                if p3_pc >= value:
+                    break
+            calc_hit_pos = self.pixel_size - i*self.gauss_bin_size
         return calc_hit_pos
 
     def set_plt_axis_distribution(self,

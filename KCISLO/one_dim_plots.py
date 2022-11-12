@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     print(f"{hit_pos=} μm")
     print(f"{calc_hit_ideal=} μm")
-    print(f"{px_model.sigma=} μm")
+    print(f"{px_model.charge_cloud_sigma=} μm")
 
     ax = plt.axes()
     title = f"1D charge distribution.\n Real hit at {hit_pos:2.3f} μm. Calculated hit at {calc_hit_ideal:2.3f}μm"

@@ -19,7 +19,7 @@ class Detector:
     px_model: model.PixelChargeSharingModel1D = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        self.px_model = model.PixelChargeSharingModel1D(self.pixel_size, self.charge_cloud_sigma)
+        self.px_model = model.PixelChargeSharingModel1D(self.pixel_size, self.charge_cloud_sigma, self.noise_sigma)
 
     def hit(self, pos: int) -> None:
         self.px_model.hit(pos, self.num_of_charges)
