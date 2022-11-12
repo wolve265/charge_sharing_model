@@ -12,7 +12,7 @@ class Detector:
     pixel_size: int  # [um]
     charge_cloud_sigma: int  # [um]
     num_of_charges: int  # [electrons]
-    noise_sigma: int  # [electrons]
+    noise_sigma: int  # [electrons RMS]
     px_model: model.PixelChargeSharingModel1D = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
