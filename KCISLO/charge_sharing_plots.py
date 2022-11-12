@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for model_1d, axis_name, ax in zip([x, y], ["X", "Y"], [ax1, ax2]):
-        title = f"{axis_name} axis 1D charge distribution.\n Real hit at {model_1d.hit_pos:2.3f} μm. Calculated hit at {model_1d.calc_hit_1D_ideal():2.3f} μm"
+        title = f"{axis_name} axis 1D charge distribution.\n Real hit at {model_1d.hit_pos:2.3f} μm. Calculated hit at {model_1d.calc_hit_1D_erfinv():2.3f} μm"
         model_1d.set_plt_axis_distribution(ax, title, fig_size)
 
     fig, (ax12, ax34) = plt.subplots(2, 2)

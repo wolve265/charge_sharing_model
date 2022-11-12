@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     for hit_pos in range(0, 75, 10):
         px_model.hit(hit_pos, electrons_num)
-        calc_hit_ideal = px_model.calc_hit_1D_ideal()
+        calc_hit_ideal = px_model.calc_hit_1D_erfinv()
 
         print("")
         print(f"{hit_pos=} μm")

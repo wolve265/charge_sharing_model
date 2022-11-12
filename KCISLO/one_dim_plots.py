@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     px_model = model.PixelChargeSharingModel1D(pixel_size)
     px_model.hit(hit_pos, electrons_num)
-    calc_hit_ideal = px_model.calc_hit_1D_ideal()
+    calc_hit_ideal = px_model.calc_hit_1D_erfinv()
 
     print(f"{hit_pos=} μm")
     print(f"{calc_hit_ideal=} μm")

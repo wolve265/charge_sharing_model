@@ -23,7 +23,7 @@ class PixelChargeSharingModel1D:
 
         # Calc hit functions
         self.CALC_HIT_FUNCS: list[Callable] = [
-            self.calc_hit_1D_ideal,
+            self.calc_hit_1D_erfinv,
             self.calc_hit_1D_taylor,
             self.calc_hit_1D_lut,
         ]
@@ -66,7 +66,7 @@ class PixelChargeSharingModel1D:
         p3: int = len(self.right())
         return p1, p2, p3
 
-    def calc_hit_1D_ideal(self, **kwargs) -> float:
+    def calc_hit_1D_erfinv(self, **kwargs) -> float:
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3
         p1_pc = p1 / psum
@@ -205,8 +205,8 @@ class PixelChargeSharingModel2D:
         return probs
 
     def calc_hit_2D(self) -> tuple[float, float]:
-        x_calc_hit = self.x.calc_hit_1D_ideal()
-        y_calc_hit = self.y.calc_hit_1D_ideal()
+        x_calc_hit = self.x.calc_hit_1D_erfinv()
+        y_calc_hit = self.y.calc_hit_1D_erfinv()
         return x_calc_hit, y_calc_hit
 
     def set_plt_axis_birds_eye_view(self,
