@@ -1,4 +1,7 @@
+#type: ignore
 from dataclasses import dataclass, field
+
+import numpy as np
 
 import model
 
@@ -20,6 +23,18 @@ class Detector:
 
     def hit(self, pos: int) -> None:
         self.px_model.hit(pos, self.num_of_charges)
+
+    def hit_times(self, pos: int, times: int, **kwargs) -> list[float]:
+        means: list[float] = []
+        for fun in self.px_model.CALC_HIT_FUNCS:
+            results = np.empty(times)
+            for i in range(times):
+                self.hit(pos)
+                results[i] = fun(**kwargs)
+            mean_result = np.mean(results)
+            mean_result = mean_result if mean_result > 0 else 0
+            means.append(mean_result)
+        return means
 
 
 SI_DETECTORS = [

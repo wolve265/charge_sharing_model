@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import special
 from scipy.stats import norm
-from typing import Any
+from typing import Any, Callable
 
 
 class PixelChargeSharingModel1D:
     """
     The one dimensional model of pixel charge sharing.
     """
+
     def __init__(self, pixel_size: int, sigma: float = None):
         # Pixel params
         self.pixel_size = pixel_size
@@ -19,6 +20,13 @@ class PixelChargeSharingModel1D:
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
         self.gauss_lut = []
+
+        # Calc hit functions
+        self.CALC_HIT_FUNCS: list[Callable] = [
+            self.calc_hit_1D_ideal,
+            self.calc_hit_1D_taylor,
+            self.calc_hit_1D_lut,
+        ]
 
         # Hit
         self.hit_pos: int | None = None
@@ -58,7 +66,7 @@ class PixelChargeSharingModel1D:
         p3: int = len(self.right())
         return p1, p2, p3
 
-    def calc_hit_1D_ideal(self) -> float:
+    def calc_hit_1D_ideal(self, **kwargs) -> float:
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3
         p1_pc = p1 / psum
@@ -86,7 +94,7 @@ class PixelChargeSharingModel1D:
             result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
         return result
 
-    def calc_hit_1D_taylor(self, order: int = 10) -> float:
+    def calc_hit_1D_taylor(self, taylor_order: int = 10, **kwargs) -> float:
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3
         p1_pc = p1 / psum
@@ -95,9 +103,9 @@ class PixelChargeSharingModel1D:
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            calc_hit_pos = -self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p1_pc - 1, order)
+            calc_hit_pos = -self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
         else:
-            calc_hit_pos = self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p3_pc - 1, order) + self.pixel_size
+            calc_hit_pos = self.sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order) + self.pixel_size
         return calc_hit_pos
 
     def create_gauss_lut(self, size: int) -> None:
@@ -111,7 +119,7 @@ class PixelChargeSharingModel1D:
         for i in range(len(pixel_bins)):
             self.gauss_lut.append(1 - cdf[i])
 
-    def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
+    def calc_hit_1D_lut(self, lut_size: int = 20, **kwargs) -> float:
         self.create_gauss_lut(lut_size)
         p1, p2, p3 = self.get_probabilities()
         psum = p1 + p2 + p3

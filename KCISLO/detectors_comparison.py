@@ -4,23 +4,6 @@ import numpy as np
 
 from detectors import Detector, ALL_DETECTORS, SI_DETECTORS, CDTE_DETECTORS
 
-def hit_times(detector: Detector, pos: int, times: int) -> tuple[float, float, float]:
-    ideals = np.empty(times)
-    taylors = np.empty(times)
-    luts = np.empty(times)
-    for i in range(times):
-        detector.hit(pos)
-        ideals[i] = detector.px_model.calc_hit_1D_ideal()
-        taylors[i] = detector.px_model.calc_hit_1D_taylor()
-        luts[i] = detector.px_model.calc_hit_1D_lut()
-    mean_ideal = np.mean(ideals)
-    mean_taylor = np.mean(taylors)
-    mean_lut = np.mean(luts)
-    mean_ideal = mean_ideal if mean_ideal > 0 else 0
-    mean_taylor = mean_taylor if mean_taylor > 0 else 0
-    mean_lut = mean_lut if mean_lut > 0 else 0
-    return mean_ideal, mean_taylor, mean_lut
-
 def bar_plots(detector: Detector, hit_posistions, means_ideal, means_taylor, means_lut) -> None:
     y = np.arange(len(hit_posistions))
     width = 0.3  # the width of the bars
@@ -49,7 +32,7 @@ def main() -> None:
         means_taylor = []
         means_lut = []
         for pos in hit_posistions:
-            result = hit_times(detector, pos, TIMES)
+            result = detector.hit_times(pos, TIMES, lut_size=20, taylor_order=10)
             mean_ideal, mean_taylor, mean_lut = result
             means_ideal.append(mean_ideal)
             means_taylor.append(mean_taylor)
