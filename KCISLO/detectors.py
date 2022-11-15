@@ -36,6 +36,12 @@ class Detector:
             means.append(mean_result)
         return means
 
+    def hit_times_pos(self, hit_positions: list[int], times: int, **kwargs) -> list[list[float]]:
+        means: list[list[float]] = []
+        for pos in hit_positions:
+            inner_means = self.hit_times(pos, times, **kwargs)
+            means.append(inner_means)
+        return means
 
 SI_DETECTORS = [
     Detector(
