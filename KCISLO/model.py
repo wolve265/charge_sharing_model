@@ -1,11 +1,11 @@
-#type: ignore
+# type: ignore
 from itertools import product
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import special
 from scipy.stats import norm
-from typing import Any, Callable
+from typing import Any
 
 
 class PixelChargeSharingModel1D:
@@ -21,13 +21,6 @@ class PixelChargeSharingModel1D:
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
         self.gauss_lut = []
-
-        # Calc hit functions
-        self.CALC_HIT_FUNCS: list[Callable] = [
-            self.calc_hit_1D_erfinv,
-            self.calc_hit_1D_taylor,
-            self.calc_hit_1D_lut,
-        ]
 
         # Hit
         self.hit_pos: int | None = None
@@ -66,22 +59,24 @@ class PixelChargeSharingModel1D:
         p2: int = len(self.mid())
         p3: int = len(self.right())
         parts = [p1, p2, p3]
-        # print(parts)
         if self.noise_sigma is None:
             return parts
         # Generate noise for each part. Unit in electrons RMS
         new_parts = []
         for p in parts:
             new_parts.append(p + int(norm.rvs(0, self.noise_sigma, 1)[0]))
+        # print(parts)
         # print(new_parts)
         return new_parts
 
-    def calc_hit_1D_erfinv(self, **kwargs) -> float:
-        p1, p2, p3 = self.get_probabilities()
-        psum = p1 + p2 + p3
-        p1_pc = p1 / psum
-        # p2_pc = p2 / psum
-        p3_pc = p3 / psum
+    def get_probabilities_percent(self) -> list[float]:
+        probs = self.get_probabilities()
+        psum = sum(probs)
+        probs_pc = [p / psum for p in probs]
+        return probs_pc
+
+    def calc_hit_1D_erfinv(self) -> float:
+        p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
@@ -104,12 +99,8 @@ class PixelChargeSharingModel1D:
             result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
         return result
 
-    def calc_hit_1D_taylor(self, taylor_order: int = 10, **kwargs) -> float:
-        p1, p2, p3 = self.get_probabilities()
-        psum = p1 + p2 + p3
-        p1_pc = p1 / psum
-        # p2_pc = p2 / psum
-        p3_pc = p3 / psum
+    def calc_hit_1D_taylor(self, taylor_order: int = 10) -> float:
+        p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
@@ -129,14 +120,11 @@ class PixelChargeSharingModel1D:
         for i in range(len(pixel_bins)):
             self.gauss_lut.append(1 - cdf[i])
 
-    def calc_hit_1D_lut(self, lut_size: int = 20, **kwargs) -> float:
+    def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
         self.create_gauss_lut(lut_size)
-        p1, p2, p3 = self.get_probabilities()
-        psum = p1 + p2 + p3
-        p1_pc = p1 / psum
-        # p2_pc = p2 / psum
-        p3_pc = p3 / psum
-        index: int = 0
+        # print(self.gauss_lut)
+        p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
+
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
             for i, value in enumerate(self.gauss_lut):
