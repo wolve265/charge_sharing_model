@@ -12,7 +12,13 @@ class PixelChargeSharingModel1D:
     The one dimensional model of pixel charge sharing.
     """
 
-    def __init__(self, pixel_size: int, num_of_charges: int, charge_cloud_sigma: float = None, noise_sigma: float = None):
+    def __init__(
+        self,
+        pixel_size: int,
+        num_of_charges: int,
+        charge_cloud_sigma: float = None,
+        noise_sigma: float = None
+    ):
         # Pixel params
         self.pixel_size = pixel_size
         self.num_of_charges = num_of_charges

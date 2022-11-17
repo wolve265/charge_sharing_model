@@ -11,27 +11,33 @@ class PixelChargeSharingModel2D:
     """
     The two dimensional model of pixel charge sharing.
     """
-    def __init__(self, pixel_size: int):
+    def __init__(
+        self,
+        pixel_size: int,
+        num_of_charges: int,
+        charge_cloud_sigma: float = None,
+        noise_sigma: float = None
+    ):
         # Pixel params
         self.pixel_size = pixel_size
-        self.sigma: float = pixel_size * 0.35
+        self.num_of_charges = num_of_charges
+        self.charge_cloud_sigma = charge_cloud_sigma if charge_cloud_sigma is not None else pixel_size * 0.35
+        self.noise_sigma = noise_sigma if noise_sigma is not None else None
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
         # 1D Models
-        self.x = PixelChargeSharingModel1D(pixel_size)
-        self.y = PixelChargeSharingModel1D(pixel_size)
+        self.x = PixelChargeSharingModel1D(pixel_size, num_of_charges, charge_cloud_sigma, noise_sigma)
+        self.y = PixelChargeSharingModel1D(pixel_size, num_of_charges, charge_cloud_sigma, noise_sigma)
 
         # Hit
         self.hit_posx: int | None = None
         self.hit_posy: int | None = None
-        self.electrons_num: int | None = None
 
-    def hit(self, posx: int, posy: int, electrons_num: int) -> None:
+    def hit(self, posx: int, posy: int) -> None:
         self.hit_posx = posx
         self.hit_posy = posy
-        self.electrons_num = electrons_num
-        self.x.hit(posx, electrons_num)
-        self.y.hit(posy, electrons_num)
+        self.x.hit(posx)
+        self.y.hit(posy)
 
     def get_probabilities(self) -> list[int]:
         probs: list[int] = []
