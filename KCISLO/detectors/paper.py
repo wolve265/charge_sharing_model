@@ -23,3 +23,10 @@ class Paper:
         "num_of_charges": 4970,
         "noise_sigma": 200,
     }
+
+    @staticmethod
+    def get_str(dict: dict[str, float]) -> str:
+        return (
+            f"""pixel size = {dict["pixel_size"]}μm, charge cloud σ = {dict["charge_cloud_sigma"]}μm\n"""
+            f"""number of charges = {dict["num_of_charges"]}e, noise σ = {dict["noise_sigma"]}e RMS"""
+        )
