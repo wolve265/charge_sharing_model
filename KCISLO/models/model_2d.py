@@ -1,8 +1,11 @@
 # type: ignore
+import os, sys
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
-from model_1d import PixelChargeSharingModel1D
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from models.model_1d import PixelChargeSharingModel1D
 
 class PixelChargeSharingModel2D:
     """
