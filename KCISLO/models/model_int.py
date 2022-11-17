@@ -19,7 +19,7 @@ class PixelChargeSharingModel1DInt(model.PixelChargeSharingModel1D):
             return
         self.gauss_lut = []
         pixel_bins = np.linspace(0, self.pixel_size, size) # podzial pixela na czesci
-        cdf = norm.cdf(pixel_bins, 0, self.sigma) # dystrybuanta
+        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma) # dystrybuanta
 
         pixel_bins = np.linspace(0, self.pixel_size*self.multiplier, size) # podzial pixela na czesci
         self.gauss_bin_size = self.num_type(pixel_bins[1] - pixel_bins[0]) # najmniejszy krok podzialu
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     model_1d = PixelChargeSharingModel1DInt(pixel_size, num_type, multiplier)
     model_1d.hit(hit_pos, electrons_num)
-    calc_hit_ideal = model_1d.calc_hit_1D_ideal()
+    calc_hit_ideal = model_1d.calc_hit_1D_erfinv()
     calc_hit_lut = model_1d.calc_hit_1D_lut(lut_size)
     print()
     print(f"{type(calc_hit_lut)=}")

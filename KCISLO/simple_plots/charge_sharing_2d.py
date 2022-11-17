@@ -1,15 +1,24 @@
 # type: ignore
-import model
+import os, sys
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from models.model_2d import PixelChargeSharingModel2D
+
+
 if __name__ == "__main__":
-    pixel_size = 75
+    PIXEL_SIZE = 75
+    NUM_OF_CHARGES = 2200
+    CHARGE_CLOUD_SIGMA = 25
+    NOISE_SIGMA = 50
+
+    hit_pos = (35, 60)
     fig_size = 40
     fig_size_integral = 1800
 
-    model_2d = model.PixelChargeSharingModel2D(pixel_size)
-    model_2d.hit(posx=35, posy=50, electrons_num=2200)
+    model_2d = PixelChargeSharingModel2D(PIXEL_SIZE, NUM_OF_CHARGES, CHARGE_CLOUD_SIGMA, NOISE_SIGMA)
+    model_2d.hit(*hit_pos)
     x = model_2d.x
     y = model_2d.y
 
@@ -43,7 +52,7 @@ if __name__ == "__main__":
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
     for model_1d, axis_name, ax in zip([x, y], ["X", "Y"], [ax1, ax2]):
-        title = f"{axis_name} axis 1D charge distribution.\n Real hit at {model_1d.hit_pos:2.3f} μm. Calculated hit at {model_1d.calc_hit_1D_ideal():2.3f} μm"
+        title = f"{axis_name} axis 1D charge distribution.\n Real hit at {model_1d.hit_pos:2.3f} μm. Calculated hit at {model_1d.calc_hit_1D_erfinv():2.3f} μm"
         model_1d.set_plt_axis_distribution(ax, title, fig_size)
 
     fig, (ax12, ax34) = plt.subplots(2, 2)
