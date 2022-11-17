@@ -13,16 +13,12 @@ def plots(ax: plt.Axes, hit_positions, means_list, labels) -> None:
     ax.legend(loc="upper left")
 
 def err_plots(ax: plt.Axes, hit_positions, means_list, labels) -> None:
-    err_values = []
     for means, label in zip(means_list, labels):
-        inner_err_values = [abs(mean-hit) for (mean, hit) in zip(means, hit_positions)]
-        err_values.append(np.mean(inner_err_values))
-        ax.plot(hit_positions, inner_err_values, label=label)
+        ax.plot(hit_positions, means, label=label)
     ax.set_xlabel('Real hit position [μm]')
     ax.set_ylabel('Absolute error [μm]')
     ax.set_ylim(0, 50)
     ax.legend(loc="upper right")
-    return err_values
 
 def bar_plots(ax: plt.Axes, hit_positions, means_erfinv, means_taylor, means_lut) -> None:
     """A little outdated"""
