@@ -1,11 +1,15 @@
 # type: ignore
-import os, sys
+import os
+import sys
 from itertools import product
+
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import norm
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from models.model_1d import PixelChargeSharingModel1D
+
 
 class PixelChargeSharingModel2D:
     """
@@ -38,20 +42,46 @@ class PixelChargeSharingModel2D:
         self.hit_posy = posy
         self.x.hit(posx)
         self.y.hit(posy)
+        self.update_probabilities_1D()
 
     def get_probabilities(self) -> list[int]:
-        probs: list[int] = []
+        probs: list[int] = [0] * 9
         x, y = self.x, self.y
         x_conds = [x.is_left, x.is_mid, x.is_right]
         y_conds = [y.is_left, y.is_mid, y.is_right]
         for i, (y_cond, x_cond) in enumerate(product(y_conds, x_conds)):
-            probs.append(0)
             for x_i, y_i in zip(self.x.charge_distribution, self.y.charge_distribution):
                 if x_cond(x_i) and y_cond(y_i):
                     probs[i] += 1
-        return probs
+        if self.noise_sigma is None:
+            return probs
+        # Generate noise for each pixel. Unit in electrons RMS
+        new_probs = []
+        for p in probs:
+            noise = abs(int(norm.rvs(loc=0, scale=self.noise_sigma, size=1)))
+            new_probs.append(p + noise)
+        return new_probs
 
-    def calc_hit_2D(self) -> tuple[float, float]:
+    def update_probabilities_1D(self) -> None:
+        """
+        Pixel numeration
+        [6][7][8]
+        [3][4][5]
+        [0][1][2]
+        """
+        probs = self.get_probabilities()
+        self.x.probs = [
+            probs[0] + probs[3] + probs[6], # left
+            probs[1] + probs[4] + probs[7], # mid
+            probs[2] + probs[5] + probs[8], # right
+        ]
+        self.y.probs = [
+            probs[0] + probs[1] + probs[2], # bottom
+            probs[3] + probs[4] + probs[5], # mid
+            probs[6] + probs[7] + probs[8], # top
+        ]
+
+    def calc_hit_2D_erfinv(self) -> tuple[float, float]:
         x_calc_hit = self.x.calc_hit_1D_erfinv()
         y_calc_hit = self.y.calc_hit_1D_erfinv()
         return x_calc_hit, y_calc_hit

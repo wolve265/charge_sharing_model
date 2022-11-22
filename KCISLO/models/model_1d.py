@@ -1,10 +1,11 @@
 # type: ignore
 import math
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import special
 from scipy.stats import norm
-from typing import Any
 
 
 class PixelChargeSharingModel1D:
@@ -32,6 +33,7 @@ class PixelChargeSharingModel1D:
         self.hit_pos: int | None = None
         # charge_distribution holds coordinates at which electrons were detected
         self.charge_distribution: Any = None
+        self.probs: list[int] = []
 
         # Matplotlib
         self.lines_pos = [-pixel_size, 0, pixel_size, 2*pixel_size]
@@ -39,6 +41,7 @@ class PixelChargeSharingModel1D:
     def hit(self, pos: int) -> None:
         self.hit_pos = pos
         self.charge_distribution = norm.rvs(self.hit_pos, self.charge_cloud_sigma, self.num_of_charges)
+        self.probs = self.get_probabilities()
 
     def is_left(self, i: float) -> bool:
         return -self.pixel_size < i < 0
@@ -62,22 +65,19 @@ class PixelChargeSharingModel1D:
         p1: int = len(self.left())
         p2: int = len(self.mid())
         p3: int = len(self.right())
-        parts = [p1, p2, p3]
+        probs = [p1, p2, p3]
         if self.noise_sigma is None:
-            return parts
+            return probs
         # Generate noise for each part. Unit in electrons RMS
-        new_parts = []
-        for p in parts:
+        new_probs = []
+        for p in probs:
             noise = abs(int(norm.rvs(loc=0, scale=self.noise_sigma, size=1)))
-            new_parts.append(p + noise)
-        # print(parts)
-        # print(new_parts)
-        return new_parts
+            new_probs.append(p + noise)
+        return new_probs
 
     def get_probabilities_percent(self) -> list[float]:
-        probs = self.get_probabilities()
-        psum = sum(probs)
-        probs_pc = [p / psum for p in probs]
+        psum = sum(self.probs)
+        probs_pc = [p / psum for p in self.probs]
         return probs_pc
 
     def calc_hit_1D_erfinv(self) -> float:
@@ -162,10 +162,9 @@ class PixelChargeSharingModel1D:
     def set_plt_axis_charge_integral(self,
             ax: plt.Axes,
             title: str,
-            probs_list,
             fig_size: int) -> None:
         ax.set_title(title, size=12)
-        ax.bar(self.lines_pos[:-1], probs_list, self.pixel_size, align='edge')
+        ax.bar(self.lines_pos[:-1], self.probs, self.pixel_size, align='edge')
         for line in self.lines_pos:
             ax.vlines(line, 0, fig_size, colors="black")
         ax.vlines(self.hit_pos, 0, fig_size/2, colors="red", label="real hit position")

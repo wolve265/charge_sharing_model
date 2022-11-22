@@ -14,7 +14,7 @@ from utils.hit_calc_comp_plots import plots, err_plots
 The script is used to compare dr Krzyzanowska's paper detectors
 """
 
-TIMES = 1
+TIMES = 10000
 STEP = 1
 LUT_SIZE = 50
 TAYLOR_ORDER = 10
