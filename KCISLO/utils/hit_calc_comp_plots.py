@@ -9,8 +9,8 @@ def plots(ax: plt.Axes, hit_positions, means_list, labels) -> None:
     ax.plot(hit_positions, hit_positions, label="Ideal")
     ax.set_xlabel('Real hit position [μm]')
     ax.set_ylabel('Calculated hit position [μm]')
-    ax.set_ylim(0, 100)
-    ax.legend(loc="upper left")
+    ax.set_ylim(0, 120)
+    ax.legend(loc="upper left", fontsize="small")
 
 def err_plots(ax: plt.Axes, hit_positions, means_list, labels) -> None:
     for means, label in zip(means_list, labels):
@@ -18,7 +18,7 @@ def err_plots(ax: plt.Axes, hit_positions, means_list, labels) -> None:
     ax.set_xlabel('Real hit position [μm]')
     ax.set_ylabel('Absolute error [μm]')
     ax.set_ylim(0, 50)
-    ax.legend(loc="upper right")
+    ax.legend(loc="upper right", fontsize="small")
 
 def bar_plots(ax: plt.Axes, hit_positions, means_erfinv, means_taylor, means_lut) -> None:
     """A little outdated"""

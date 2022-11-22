@@ -68,7 +68,8 @@ class PixelChargeSharingModel1D:
         # Generate noise for each part. Unit in electrons RMS
         new_parts = []
         for p in parts:
-            new_parts.append(p + int(norm.rvs(0, self.noise_sigma, 1)[0]))
+            noise = abs(int(norm.rvs(loc=0, scale=self.noise_sigma, size=1)))
+            new_parts.append(p + noise)
         # print(parts)
         # print(new_parts)
         return new_parts
@@ -83,6 +84,8 @@ class PixelChargeSharingModel1D:
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
+        if p1_pc == 0 and p3_pc == 0:
+            p1_pc = 0.0001
         if p1_pc > p3_pc:
             calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p1_pc - 1)
         else:
@@ -92,13 +95,12 @@ class PixelChargeSharingModel1D:
     def erfinv_Taylor(self, probability: float, aprox_order: int) -> float:
         result: float = 0.0
         c = [1, 1]
-        current_c = 0
         for c_k in range(aprox_order - 1):
+            current_c = 0
             c_k = c_k + 2
             for m in range(c_k):
                 current_c += (c[m] * c[c_k - 1 - m]) / ((m + 1) * (2 * m + 1))
             c.append(current_c)
-            current_c = 0
         for k in range(aprox_order):
             result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
         return result
