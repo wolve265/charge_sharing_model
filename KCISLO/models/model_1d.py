@@ -81,6 +81,7 @@ class PixelChargeSharingModel1D:
         return probs_pc
 
     def calc_hit_1D_erfinv(self) -> float:
+        self.probs = self.get_probabilities()
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
@@ -106,6 +107,7 @@ class PixelChargeSharingModel1D:
         return result
 
     def calc_hit_1D_taylor(self, taylor_order: int = 10) -> float:
+        self.probs = self.get_probabilities()
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
@@ -127,6 +129,7 @@ class PixelChargeSharingModel1D:
             self.gauss_lut.append(1 - cdf[i])
 
     def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
+        self.probs = self.get_probabilities()
         self.create_gauss_lut(lut_size)
         # print(self.gauss_lut)
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()

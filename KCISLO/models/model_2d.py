@@ -42,7 +42,6 @@ class PixelChargeSharingModel2D:
         self.hit_posy = posy
         self.x.hit(posx)
         self.y.hit(posy)
-        self.update_probabilities_1D()
 
     def get_probabilities(self) -> list[int]:
         probs: list[int] = [0] * 9
@@ -82,8 +81,22 @@ class PixelChargeSharingModel2D:
         ]
 
     def calc_hit_2D_erfinv(self) -> tuple[float, float]:
+        # remove update to compare method with te same input
+        self.update_probabilities_1D()
         x_calc_hit = self.x.calc_hit_1D_erfinv()
         y_calc_hit = self.y.calc_hit_1D_erfinv()
+        return x_calc_hit, y_calc_hit
+
+    def calc_hit_2D_taylor(self, taylor_order: int = 10) -> tuple[float, float]:
+        self.update_probabilities_1D()
+        x_calc_hit = self.x.calc_hit_1D_taylor(taylor_order)
+        y_calc_hit = self.y.calc_hit_1D_taylor(taylor_order)
+        return x_calc_hit, y_calc_hit
+
+    def calc_hit_2D_lut(self, lut_size: int = 20) -> tuple[float, float]:
+        self.update_probabilities_1D()
+        x_calc_hit = self.x.calc_hit_1D_lut(lut_size)
+        y_calc_hit = self.y.calc_hit_1D_lut(lut_size)
         return x_calc_hit, y_calc_hit
 
     def set_plt_axis_birds_eye_view(self,
