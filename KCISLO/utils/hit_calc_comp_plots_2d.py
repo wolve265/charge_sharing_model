@@ -1,6 +1,7 @@
 #type: ignore
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.figure import Figure
 
 
 def plots(ax: list[plt.Axes], hit_positions, means_list, labels) -> None:
@@ -23,6 +24,15 @@ def err_plots(ax: list[plt.Axes], hit_positions, means_list, labels) -> None:
         ax[i].set_ylabel('Absolute error [μm]')
         ax[i].set_ylim(0, 50)
         ax[i].legend(loc="upper right", fontsize="small")
+
+def colorbar_plot(fig: Figure, axes: list[plt.Axes], x_arr, y_arr, c_arr, titles) -> None:
+    for i, (ax, c_arr_ax, title_ax) in enumerate(zip(axes, c_arr, titles)):
+        pcm = ax.pcolormesh(x_arr, y_arr, c_arr_ax)
+        ax.set_title(title_ax)
+        if i == 0:
+            ax.set_ylabel("Pixel Y coordinates [μm]")
+        ax.set_xlabel("Pixel X coordinates [μm]")
+    fig.colorbar(pcm, ax=axes, label="Error value [μm]")
 
 def bar_plots(ax: plt.Axes, hit_positions, means_erfinv, means_taylor, means_lut) -> None:
     """A little outdated"""
