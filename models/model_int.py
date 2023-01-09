@@ -1,18 +1,39 @@
 #type: ignore
+import math
 import numpy as np
+import os
+import sys
+from scipy import special
 from scipy.stats import norm
+from typing import Never
 
-import model
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from models.model_1d import PixelChargeSharingModel1D
 
 
-class PixelChargeSharingModel1DInt(model.PixelChargeSharingModel1D):
+class PixelChargeSharingModel1DInt(PixelChargeSharingModel1D):
     """
     The one dimensional model of pixel charge sharing.
     """
-    def __init__(self, pixel_size: int, num_type, multiplier):
-        super().__init__(pixel_size)
+    def __init__(
+        self,
+        pixel_size: int,
+        num_of_charges: int,
+        charge_cloud_sigma: float = None,
+        noise_sigma: float = None,
+        num_type: type = int,
+        multiplier: int = 100
+    ) -> None:
+        super().__init__(pixel_size, num_of_charges, charge_cloud_sigma, noise_sigma)
         self.num_type = num_type
         self.multiplier = num_type(multiplier)
+        self.gauss_lut: list[self.num_type] = []
+
+    def get_probabilities_percent_new(self) -> list[int]:
+        psum = sum(self.probs)
+        probs_pc = [self.multiplier * p // psum for p in self.probs]
+        return probs_pc
 
     def create_gauss_lut(self, size: int) -> None:
         if len(self.gauss_lut) == size:
@@ -27,42 +48,19 @@ class PixelChargeSharingModel1DInt(model.PixelChargeSharingModel1D):
             self.gauss_lut.append(self.num_type(self.multiplier *(1 - i)))
 
     def calc_hit_1D_lut(self, lut_size: int):
+        self.probs = self.get_probabilities()
         self.create_gauss_lut(lut_size)
-        p1, p2, p3 = self.get_probabilities()
-        psum = p1 + p2 + p3
-        p1_pc = self.multiplier * p1 // psum
-        # p2_pc = p2 / psum
-        p3_pc = self.multiplier * p3 // psum
-        index = self.num_type(0)
+        p1_pc, p2_pc, p3_pc = self.get_probabilities_percent_new()
+
         calc_hit_pos = self.num_type(0)
         if p1_pc > p3_pc:
-            while(p1_pc < self.gauss_lut[index]):
-                index += self.num_type(1)
-            calc_hit_pos = index*self.gauss_bin_size
+            for i, value in enumerate(self.gauss_lut):
+                if p1_pc >= value:
+                    break
+            calc_hit_pos = i*self.gauss_bin_size
         else:
-            while(p3_pc < self.gauss_lut[index]):
-                index += self.num_type(1)
-            calc_hit_pos = self.num_type(self.multiplier * self.pixel_size) - index*self.gauss_bin_size
+            for i, value in enumerate(self.gauss_lut):
+                if p3_pc >= value:
+                    break
+            calc_hit_pos = self.num_type(self.multiplier * self.pixel_size) - i*self.gauss_bin_size
         return calc_hit_pos
-
-
-if __name__ == "__main__":
-    pixel_size = 75 # um
-    hit_pos = 70
-    electrons_num = 2200
-    lut_size = 1000
-
-    num_type = np.uint16
-    multiplier = 100
-
-    model_1d = PixelChargeSharingModel1DInt(pixel_size, num_type, multiplier)
-    model_1d.hit(hit_pos, electrons_num)
-    calc_hit_ideal = model_1d.calc_hit_1D_erfinv()
-    calc_hit_lut = model_1d.calc_hit_1D_lut(lut_size)
-    print()
-    print(f"{type(calc_hit_lut)=}")
-    calc_hit_lut = 1000//multiplier * calc_hit_lut
-    print()
-    print(f"{hit_pos=} μm")
-    print(f" {calc_hit_ideal=:.3f} μm")
-    print(f"   {calc_hit_lut=:,} nm ({lut_size=})")

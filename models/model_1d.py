@@ -27,7 +27,7 @@ class PixelChargeSharingModel1D:
         self.noise_sigma = noise_sigma if noise_sigma is not None else None
         self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
 
-        self.gauss_lut = []
+        self.gauss_lut: list[float] = []
 
         # Hit
         self.hit_pos: int | None = None
@@ -125,8 +125,8 @@ class PixelChargeSharingModel1D:
         self.gauss_bin_size = pixel_bins[1] - pixel_bins[0] # najmniejszy krok podzialu
         cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma) # dystrybuanta
 
-        for i in range(len(pixel_bins)):
-            self.gauss_lut.append(1 - cdf[i])
+        for cdf_i in cdf:
+            self.gauss_lut.append(1 - cdf_i)
 
     def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
         self.probs = self.get_probabilities()
