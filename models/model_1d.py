@@ -13,6 +13,9 @@ class PixelChargeSharingModel1D:
     The one dimensional model of pixel charge sharing.
     """
 
+    gauss_lut: list[float] = []
+    gauss_bin_size: float = 0.0
+
     def __init__(
         self,
         pixel_size: int,
@@ -30,8 +33,6 @@ class PixelChargeSharingModel1D:
         self.pixel_coordinates = list(
             np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1)
         )
-
-        self.gauss_lut: list[float] = []
 
         # Hit
         self.hit_pos: int | None = None
@@ -134,15 +135,18 @@ class PixelChargeSharingModel1D:
         return calc_hit_pos
 
     def create_gauss_lut(self, size: int) -> None:
-        if len(self.gauss_lut) == size:
+        if len(PixelChargeSharingModel1D.gauss_lut) == size:
             return
-        self.gauss_lut = []
+        PixelChargeSharingModel1D.gauss_lut = []
         pixel_bins = np.linspace(0, self.pixel_size, size)  # podzial pixela na czesci
-        self.gauss_bin_size = pixel_bins[1] - pixel_bins[0]  # najmniejszy krok podzialu
+        PixelChargeSharingModel1D.gauss_bin_size = (
+            pixel_bins[1] - pixel_bins[0]
+        )  # najmniejszy krok podzialu
         cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma)  # dystrybuanta
 
         for cdf_i in cdf:
-            self.gauss_lut.append(1 - cdf_i)
+            PixelChargeSharingModel1D.gauss_lut.append(1 - cdf_i)
+        print("Creating gauss")
 
     def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
         self.create_gauss_lut(lut_size)
