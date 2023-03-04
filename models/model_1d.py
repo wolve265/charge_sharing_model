@@ -18,14 +18,18 @@ class PixelChargeSharingModel1D:
         pixel_size: int,
         num_of_charges: int,
         charge_cloud_sigma: float = None,
-        noise_sigma: float = None
+        noise_sigma: float = None,
     ):
         # Pixel params
         self.pixel_size = pixel_size
         self.num_of_charges = num_of_charges
-        self.charge_cloud_sigma = charge_cloud_sigma if charge_cloud_sigma is not None else pixel_size * 0.35
+        self.charge_cloud_sigma = (
+            charge_cloud_sigma if charge_cloud_sigma is not None else pixel_size * 0.35
+        )
         self.noise_sigma = noise_sigma if noise_sigma is not None else None
-        self.pixel_coordinates = list(np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1))
+        self.pixel_coordinates = list(
+            np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1)
+        )
 
         self.gauss_lut: list[float] = []
 
@@ -36,11 +40,13 @@ class PixelChargeSharingModel1D:
         self.probs: list[int] = []
 
         # Matplotlib
-        self.lines_pos = [-pixel_size, 0, pixel_size, 2*pixel_size]
+        self.lines_pos = [-pixel_size, 0, pixel_size, 2 * pixel_size]
 
     def hit(self, pos: int) -> None:
         self.hit_pos = pos
-        self.charge_distribution = norm.rvs(self.hit_pos, self.charge_cloud_sigma, self.num_of_charges)
+        self.charge_distribution = norm.rvs(
+            self.hit_pos, self.charge_cloud_sigma, self.num_of_charges
+        )
         self.probs = self.get_probabilities()
 
     def is_left(self, i: float) -> bool:
@@ -81,7 +87,6 @@ class PixelChargeSharingModel1D:
         return probs_pc
 
     def calc_hit_1D_erfinv(self) -> float:
-        self.probs = self.get_probabilities()
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
@@ -90,7 +95,10 @@ class PixelChargeSharingModel1D:
         if p1_pc > p3_pc:
             calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p1_pc - 1)
         else:
-            calc_hit_pos = self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p3_pc - 1) + self.pixel_size
+            calc_hit_pos = (
+                self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p3_pc - 1)
+                + self.pixel_size
+            )
         return calc_hit_pos
 
     def erfinv_Taylor(self, probability: float, aprox_order: int) -> float:
@@ -107,29 +115,36 @@ class PixelChargeSharingModel1D:
         return result
 
     def calc_hit_1D_taylor(self, taylor_order: int = 10) -> float:
-        self.probs = self.get_probabilities()
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
 
         calc_hit_pos: float = 0.0
         if p1_pc > p3_pc:
-            calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
+            calc_hit_pos = (
+                -self.charge_cloud_sigma
+                * math.sqrt(2)
+                * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
+            )
         else:
-            calc_hit_pos = self.charge_cloud_sigma * math.sqrt(2) * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order) + self.pixel_size
+            calc_hit_pos = (
+                self.charge_cloud_sigma
+                * math.sqrt(2)
+                * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order)
+                + self.pixel_size
+            )
         return calc_hit_pos
 
     def create_gauss_lut(self, size: int) -> None:
         if len(self.gauss_lut) == size:
             return
         self.gauss_lut = []
-        pixel_bins = np.linspace(0, self.pixel_size, size) # podzial pixela na czesci
-        self.gauss_bin_size = pixel_bins[1] - pixel_bins[0] # najmniejszy krok podzialu
-        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma) # dystrybuanta
+        pixel_bins = np.linspace(0, self.pixel_size, size)  # podzial pixela na czesci
+        self.gauss_bin_size = pixel_bins[1] - pixel_bins[0]  # najmniejszy krok podzialu
+        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma)  # dystrybuanta
 
         for cdf_i in cdf:
             self.gauss_lut.append(1 - cdf_i)
 
     def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
-        self.probs = self.get_probabilities()
         self.create_gauss_lut(lut_size)
         # print(self.gauss_lut)
         p1_pc, p2_pc, p3_pc = self.get_probabilities_percent()
@@ -139,36 +154,30 @@ class PixelChargeSharingModel1D:
             for i, value in enumerate(self.gauss_lut):
                 if p1_pc >= value:
                     break
-            calc_hit_pos = i*self.gauss_bin_size
+            calc_hit_pos = i * self.gauss_bin_size
         else:
             for i, value in enumerate(self.gauss_lut):
                 if p3_pc >= value:
                     break
-            calc_hit_pos = self.pixel_size - i*self.gauss_bin_size
+            calc_hit_pos = self.pixel_size - i * self.gauss_bin_size
         return calc_hit_pos
 
-    def set_plt_axis_distribution(self,
-            ax: plt.Axes,
-            title: str,
-            fig_size: int) -> None:
-        ax.set_xlim(-self.pixel_size, 2*self.pixel_size)
+    def set_plt_axis_distribution(self, ax: plt.Axes, title: str, fig_size: int) -> None:
+        ax.set_xlim(-self.pixel_size, 2 * self.pixel_size)
         ax.set_ylim(0, fig_size)
-        ax.set_xlabel(f'Position (μm)', labelpad=5, size=13)
-        ax.set_ylabel('Number of electrons', labelpad=5, size=13)
+        ax.set_xlabel(f"Position (μm)", labelpad=5, size=13)
+        ax.set_ylabel("Number of electrons", labelpad=5, size=13)
         ax.set_title(title, size=12)
         ax.hist(self.charge_distribution, bins=len(self.pixel_coordinates))
         for pos in self.lines_pos:
             ax.vlines(pos, 0, fig_size, colors="black")
-        ax.vlines(self.hit_pos, 0, fig_size/2, colors="red", label="real hit position")
+        ax.vlines(self.hit_pos, 0, fig_size / 2, colors="red", label="real hit position")
         ax.legend()
 
-    def set_plt_axis_charge_integral(self,
-            ax: plt.Axes,
-            title: str,
-            fig_size: int) -> None:
+    def set_plt_axis_charge_integral(self, ax: plt.Axes, title: str, fig_size: int) -> None:
         ax.set_title(title, size=12)
-        ax.bar(self.lines_pos[:-1], self.probs, self.pixel_size, align='edge')
+        ax.bar(self.lines_pos[:-1], self.probs, self.pixel_size, align="edge")
         for line in self.lines_pos:
             ax.vlines(line, 0, fig_size, colors="black")
-        ax.vlines(self.hit_pos, 0, fig_size/2, colors="red", label="real hit position")
+        ax.vlines(self.hit_pos, 0, fig_size / 2, colors="red", label="real hit position")
         ax.legend()
