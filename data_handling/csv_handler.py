@@ -1,44 +1,58 @@
+import sys
 from pathlib import Path
 from tkinter import filedialog as fd
 
 import pandas as pd
-from filelock import FileLock
 
 
 class CsvHandler:
     CSV_TYPES = [
         ("CSV", "*.csv"),
     ]
+    INITIALDIR = Path(__file__).resolve().parents[1]
 
-    def __init__(self) -> None:
+    def __init__(self, sep: str = ";") -> None:
         self.df = pd.DataFrame()
         self.path = Path(".")
+        self.sep = sep
 
-    def read(self, path: str | Path | None = None, dialog: bool = False) -> pd.DataFrame:
+    def read(
+        self,
+        path: str | Path | None = None,
+        header: int | None = None,
+        dialog: bool = False,
+    ) -> pd.DataFrame:
         if dialog:
-            path = fd.askopenfilename(filetypes=self.CSV_TYPES)
+            path = fd.askopenfilename(filetypes=self.CSV_TYPES, initialdir=self.INITIALDIR)
         if not path:
-            raise Exception("[READ] No path given.")
+            sys.exit("[Exit] CsvHandler.read: No path given.")
 
         self.path = Path(path)
-        self.df = pd.read_csv(self.path)
+        self.df = pd.read_csv(self.path, sep=self.sep, header=header)
         return self.df
 
-    def write(self, path: str | Path | None = None, mode: str = "w", dialog: bool = False) -> None:
+    def write(
+        self,
+        path: str | Path | None = None,
+        df: pd.DataFrame = None,
+        mode: str = "w",
+        header: bool = False,
+        dialog: bool = False,
+    ) -> None:
         if dialog:
-            path = fd.asksaveasfilename(defaultextension="csv", filetypes=self.CSV_TYPES)
+            path = fd.asksaveasfilename(
+                defaultextension="csv", filetypes=self.CSV_TYPES, initialdir=self.INITIALDIR
+            )
             if not path:
                 return
         if path:
             path = Path(path)
         else:
             path = self.path
+        if df is None:
+            df = self.df
 
-        lock_path = path.with_suffix(".lock")
-        lock = FileLock(lock_path, timeout=1)
-        header = False if "a" in mode else True
-        with lock:
-            self.df.to_csv(path, mode=mode, index=False, header=header)
+        df.to_csv(path, sep=self.sep, mode=mode, index=False, header=header)
 
 
 def main():

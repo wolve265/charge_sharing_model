@@ -25,6 +25,7 @@ class PcsModel1D:
         self.pixel_size = detector.pixel_size
         self.num_of_charges = detector.num_of_charges
         self.charge_cloud_sigma = detector.charge_cloud_sigma
+        print(self.charge_cloud_sigma)
         self.noise_sigma = detector.noise_sigma
         self.pixel_coordinates = list(
             np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1)
@@ -82,6 +83,7 @@ class PcsModel1D:
 
     def get_probabilities_percent(self) -> list[float]:
         psum = sum(self.probs)
+        # print(self.probs)
         probs_pc = [p / psum for p in self.probs]
         return probs_pc
 
@@ -136,6 +138,7 @@ class PcsModel1D:
     def create_gauss_lut(self, size: int) -> None:
         if len(PcsModel1D.gauss_lut) == size:
             return
+        # print("[DEBUG] create gauss")
         PcsModel1D.gauss_lut = []
         pixel_bins = np.linspace(0, self.pixel_size, size)  # podzial pixela na czesci
         PcsModel1D.gauss_bin_size = pixel_bins[1] - pixel_bins[0]  # najmniejszy krok podzialu

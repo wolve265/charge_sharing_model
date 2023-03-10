@@ -131,7 +131,7 @@ dmypy.json
 # VSCode
 .vscode/
 
-Wyniki/
+results/
 *.png
 *.zip
 *.docx
