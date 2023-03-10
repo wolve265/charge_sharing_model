@@ -11,7 +11,7 @@ sys.path.append(str(Path(sys.path[0]).parents[0]))
 
 from models.pcs_model_1d import PcsModel1D
 
-RESULTSDIR = Path("results/dot")
+RESULTSDIR = Path("results/raw/dot")
 
 
 @dataclass
@@ -55,9 +55,7 @@ class Sample1D:
         self.file.parent.mkdir(parents=True, exist_ok=True)
         if self.file.exists():
             self.file.unlink()
-        x_columns = [f"x{i}" for i in self.positions_to_test]
-        with self.file.open("w") as f:
-            print(self.sep.join(x_columns), file=f)
+        self.file.touch()
 
     def hit_and_calc(self, t: int) -> float:
         lock = FileLock(self.filelock, timeout=10)
@@ -78,6 +76,7 @@ class Sample1D:
             - 10 -> 0.75s
             - 100 -> 8s
             - 1000 -> 1m 15s
+
         One process, with lock:
             - 100 -> 8s
             - 1000 -> 1m 18s
@@ -93,11 +92,14 @@ class Sample1D:
         Chunksize = 1:
             - 100 -> 3s
             - 1000 -> 14s
+
         Chunksize = 5:
             - 1000 -> 14s
+
         Chunksize = 10:
             - 1000 -> 14s
             - 10_000 -> 2m 4s
+
         Chunksize = 100:
             - 10_000 -> 2m 5s
         """

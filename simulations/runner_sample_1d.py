@@ -18,15 +18,15 @@ def main():
         samples.append(
             Sample1D(
                 model=PcsModel1D(detector),
-                approx_function=PcsModel1D.calc_hit_1D_taylor,
-                approx_function_param=10,
+                approx_function=PcsModel1D.calc_hit_1D_lut,
+                approx_function_param=50,
                 detector_size_step=1,
-                times=10,
+                times=10000,
             )
         )
     for sample in samples:
-        sample.test()
-        # sample.test_process()
+        # sample.test()
+        sample.test_process()
         return
 
 

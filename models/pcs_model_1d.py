@@ -25,7 +25,6 @@ class PcsModel1D:
         self.pixel_size = detector.pixel_size
         self.num_of_charges = detector.num_of_charges
         self.charge_cloud_sigma = detector.charge_cloud_sigma
-        print(self.charge_cloud_sigma)
         self.noise_sigma = detector.noise_sigma
         self.pixel_coordinates = list(
             np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1)
