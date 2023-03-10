@@ -1,9 +1,6 @@
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 
-sys.path.append(str(Path(__file__).parents[1]))
-from detectors.detector import Detector
+from .detector import Detector
 
 
 @dataclass
