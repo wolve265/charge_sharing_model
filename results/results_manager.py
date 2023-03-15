@@ -11,14 +11,11 @@ sys.path.append(str(Path(sys.path[0]).parents[0]))
 
 
 class ResultsMgr:
-    CSV_TYPES = [
-        ("CSV", "*.csv"),
-    ]
+    CSV_TYPES = [("CSV", "*.csv")]
     INITIALDIR = Path(__file__).resolve().parent
     RESULTS_RAW = Path("results/raw")
     RESULTS_MEAN = Path("results/mean")
-    DOT = Path("dot")
-    COMMA = Path("comma")
+    RESULTS_ABS_ERR = Path("results/abs_err")
     SEP = ";"
 
     def __init__(self) -> None:
@@ -28,21 +25,11 @@ class ResultsMgr:
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("-g", "--gen", action="store_true", help="Generates comma, mean data")
+        parser.add_argument("-g", "--gen", action="store_true", help="Generates other data")
         parser.add_argument(
             "-p", "--plot", action="store_true", help="Plots selected result file or files"
         )
         return parser.parse_args()
-
-    def gen_comma(self, basedir: Path) -> None:
-        dotdir = basedir / self.DOT
-        commadir = basedir / self.COMMA
-        for dotfile in dotdir.iterdir():
-            content = dotfile.read_text().replace(".", ",")
-
-            commafile = commadir.joinpath(dotfile.name)
-            commadir.mkdir(parents=True, exist_ok=True)
-            commafile.write_text(content)
 
     def gen_mean(self, src: Path, dest: Path) -> None:
         for file in src.iterdir():
@@ -52,6 +39,16 @@ class ResultsMgr:
             meanfile = dest.joinpath(file.name)
             dest.mkdir(parents=True, exist_ok=True)
             df_mean.to_csv(meanfile, sep=self.SEP, index=False, header=False)
+
+    def gen_abs_err(self, src: Path, dest: Path) -> None:
+        for file in src.iterdir():
+            df = pd.read_csv(file, sep=self.SEP, header=None)
+            df_abs_err = pd.DataFrame(df - df.columns).abs()
+            print(df_abs_err)
+
+            abs_err_file = dest.joinpath(file.name)
+            dest.mkdir(parents=True, exist_ok=True)
+            df_abs_err.to_csv(abs_err_file, sep=self.SEP, index=False, header=False)
 
     def read_dialog(self) -> tuple[list[Path], list[pd.DataFrame]]:
         filenames = fd.askopenfilenames(filetypes=self.CSV_TYPES, initialdir=self.INITIALDIR)
@@ -77,9 +74,8 @@ class ResultsMgr:
 
     def run(self):
         if self.gen:
-            # self.gen_comma(self.RESULTS_RAW)
-            self.gen_mean(self.RESULTS_RAW / self.DOT, self.RESULTS_MEAN / self.DOT)
-            # self.gen_comma(self.RESULTS_MEAN)
+            # self.gen_mean(self.RESULTS_RAW, self.RESULTS_MEAN)
+            self.gen_abs_err(self.RESULTS_RAW, self.RESULTS_ABS_ERR)
             print("Generation data done.")
         if self.plot:
             self.plot_result()
