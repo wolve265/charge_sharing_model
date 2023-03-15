@@ -70,7 +70,7 @@ class ResultsMgr:
                 df = pd.DataFrame(df.mean()).T
             new_dfs.append(df)
         concat_df = pd.concat(new_dfs, ignore_index=True)
-        concat_df.set_axis(filenames, inplace=True)
+        concat_df.set_axis(filenames, copy=False)
         print(concat_df)
         concat_df.T.plot()
         plt.show()
