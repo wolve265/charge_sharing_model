@@ -152,7 +152,9 @@ class PcsModel1D:
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
         calc_hit_pos: float = 0.0
-        if p1_pc > p3_pc:
+        if p1_pc == p3_pc:
+            calc_hit_pos = self.pixel_size / 2
+        elif p1_pc > p3_pc:
             for i, value in enumerate(self.gauss_lut):
                 if p1_pc >= value:
                     break
