@@ -21,7 +21,7 @@ def main():
                 approx_function=PcsModel1D.calc_hit_1D_lut,
                 approx_function_param=50,
                 detector_size_step=1,
-                times=10000,
+                times=2500,
             )
         )
     for sample in samples:
