@@ -74,7 +74,6 @@ class Sample1D:
         )
         detector = eval(f"{model_detector_material.lower()}.{model_detector_name}")
         model = model_type(detector)
-        print(model.detector)
         return cls(
             model, approx_function, int(function_param), int(model_detector_step_size), int(times)
         )
