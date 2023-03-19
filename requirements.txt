@@ -2,4 +2,5 @@ filelock==3.8.0
 matplotlib==3.6.2
 numpy==1.23.4
 pandas==1.5.1
+PyYAML==6.0
 scipy==1.10.1
