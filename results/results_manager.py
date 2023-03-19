@@ -69,6 +69,7 @@ class ResultsMgr:
     def get_data(self) -> pd.DataFrame:
         paths, dfs = self.read_dialog()
         filenames = [path.stem for path in paths]
+        [print(file) for file in filenames]
         self.samples = [Sample1D.from_file(file) for file in filenames]
         new_dfs: list[pd.DataFrame] = []
         for df in dfs:
