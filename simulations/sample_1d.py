@@ -117,44 +117,19 @@ class Sample1D:
         with lock, self.file.open("a") as f:
             print(self.sep.join(results), file=f)
 
-    def test(self) -> None:
-        """Test sample
-
-        One process, no lock:
-            - 10 -> 0.75s
-            - 100 -> 8s
-            - 1000 -> 1m 15s
-
-        One process, with lock:
-            - 100 -> 8s
-            - 1000 -> 1m 18s
-        """
-        self.create_result_file()
-
-        for t in range(self.times):
-            self.hit_and_calc(t)
-
-    def test_process(self) -> None:
+    def test_process(self, processes: int) -> None:
         """Test sample with ProcessPoolExecutor
 
-        Chunksize = 1:
+        Times:
             - 100 -> 3s
             - 1000 -> 14s
-
-        Chunksize = 5:
-            - 1000 -> 14s
-
-        Chunksize = 10:
-            - 1000 -> 14s
-            - 10_000 -> 2m 4s
-
-        Chunksize = 100:
+            - 2500 -> 26s
             - 10_000 -> 2m 5s
         """
         self.create_result_file()
-
+        chunksize = self.times // processes
         t = range(self.times)
         with ProcessPoolExecutor() as executor:
-            executor.map(self.hit_and_calc, t, chunksize=100)
+            executor.map(self.hit_and_calc, t, chunksize=chunksize)
 
-        print(f"{self.file}")
+        print(self.file)
