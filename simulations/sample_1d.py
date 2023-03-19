@@ -66,11 +66,11 @@ class Sample1D:
         ) = re_obj.groups()
         model_type = PcsModel1D if model_dimension == "1D" else None
         approx_function = (
-            model_type.calc_hit_1D_lut
+            model_type.calc_hit_lut
             if function_name == "lut"
-            else model_type.calc_hit_1D_erfinv
+            else model_type.calc_hit_erfinv
             if function_name == "erfinv"
-            else model_type.calc_hit_1D_taylor
+            else model_type.calc_hit_taylor
         )
         detector = eval(f"{model_detector_material.lower()}.{model_detector_name}")
         model = model_type(detector)

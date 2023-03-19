@@ -2,7 +2,6 @@
 import math
 from typing import Any
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy import special
 from scipy.stats import norm
@@ -86,7 +85,7 @@ class PcsModel1D:
         probs_pc = [p / psum for p in self.probs]
         return probs_pc
 
-    def calc_hit_1D_erfinv(self, param: int = 0) -> float:
+    def calc_hit_erfinv(self, param: int = 0) -> float:
         del param
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
@@ -115,7 +114,7 @@ class PcsModel1D:
             result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
         return result
 
-    def calc_hit_1D_taylor(self, taylor_order: int = 10) -> float:
+    def calc_hit_taylor(self, taylor_order: int = 10) -> float:
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
         calc_hit_pos: float = 0.0
@@ -146,7 +145,7 @@ class PcsModel1D:
         for cdf_i in cdf:
             PcsModel1D.gauss_lut.append(1 - cdf_i)
 
-    def calc_hit_1D_lut(self, lut_size: int = 20) -> float:
+    def calc_hit_lut(self, lut_size: int = 20) -> float:
         self.create_gauss_lut(lut_size)
         # print(PcsModel1D.gauss_lut)
         p1_pc, p2_pc, p3_pc = self.probs_pc
@@ -165,23 +164,3 @@ class PcsModel1D:
                     break
             calc_hit_pos = self.pixel_size - i * self.gauss_bin_size
         return calc_hit_pos
-
-    def set_plt_axis_distribution(self, ax: plt.Axes, title: str, fig_size: int) -> None:
-        ax.set_xlim(-self.pixel_size, 2 * self.pixel_size)
-        ax.set_ylim(0, fig_size)
-        ax.set_xlabel(f"Position (μm)", labelpad=5, size=13)
-        ax.set_ylabel("Number of electrons", labelpad=5, size=13)
-        ax.set_title(title, size=12)
-        ax.hist(self.charge_distribution, bins=len(self.pixel_coordinates))
-        for pos in self.lines_pos:
-            ax.vlines(pos, 0, fig_size, colors="black")
-        ax.vlines(self.hit_pos, 0, fig_size / 2, colors="red", label="real hit position")
-        ax.legend()
-
-    def set_plt_axis_charge_integral(self, ax: plt.Axes, title: str, fig_size: int) -> None:
-        ax.set_title(title, size=12)
-        ax.bar(self.lines_pos[:-1], self.probs, self.pixel_size, align="edge")
-        for line in self.lines_pos:
-            ax.vlines(line, 0, fig_size, colors="black")
-        ax.vlines(self.hit_pos, 0, fig_size / 2, colors="red", label="real hit position")
-        ax.legend()
