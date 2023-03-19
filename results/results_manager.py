@@ -17,7 +17,6 @@ class ResultsMgr:
     CSV_TYPES = [("CSV", "*.csv")]
     INITIALDIR = Path(__file__).resolve().parent
     RESULTS_RAW = Path("results/raw")
-    RESULTS_MEAN = Path("results/mean")
     RESULTS_ABS_ERR = Path("results/abs_err")
     SETTINGS = Path("results/settings.yaml")
     SEP = ";"
@@ -36,15 +35,6 @@ class ResultsMgr:
             "-p", "--plot", action="store_true", help="Plots selected result file or files"
         )
         return parser.parse_args()
-
-    def gen_mean(self, src: Path, dest: Path) -> None:
-        for file in src.iterdir():
-            df = pd.read_csv(file, sep=self.SEP, header=None)
-            df_mean = pd.DataFrame(df.mean()).T
-
-            meanfile = dest.joinpath(file.name)
-            dest.mkdir(parents=True, exist_ok=True)
-            df_mean.to_csv(meanfile, sep=self.SEP, index=False, header=False)
 
     def gen_abs_err(self, src: Path, dest: Path) -> None:
         for file in src.iterdir():
@@ -105,7 +95,6 @@ class ResultsMgr:
 
     def run(self):
         if self.gen:
-            # self.gen_mean(self.RESULTS_RAW, self.RESULTS_MEAN)
             self.gen_abs_err(self.RESULTS_RAW, self.RESULTS_ABS_ERR)
             print("Generation data done.")
         if self.plot:
