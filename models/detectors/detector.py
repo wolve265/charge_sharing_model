@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Detector:
-    pixel_size: float
-    charge_cloud_sigma: float
-    num_of_charges: float
-    noise_sigma: float
+    pixel_size: int
+    charge_cloud_sigma: int
+    num_of_charges: int
+    noise_sigma: int
     name: str
     material: str
 
