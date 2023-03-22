@@ -32,12 +32,17 @@ class FiguresGenerator:
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument(
-            "-p", "--plot", action="store_true", help="Plots selected result file or files"
+            "-p",
+            "--plot",
+            action="store_true",
+            help="Plots selected result file or files",
         )
         return parser.parse_args()
 
     def read_dialog(self) -> list[Path]:
-        filenames = fd.askopenfilenames(filetypes=self.CSV_TYPES, initialdir=self.INITIALDIR)
+        filenames = fd.askopenfilenames(
+            filetypes=self.CSV_TYPES, initialdir=self.INITIALDIR
+        )
         if not filenames:
             sys.exit("No input given")
         files = [Path(file) for file in filenames]
@@ -64,7 +69,11 @@ class FiguresGenerator:
 
     def plot_raw(self, ax: plt.Axes, df: pd.DataFrame) -> None:
         df.plot(ax=ax)
-        title = self.settings["title"] if self.settings["title"] else self.title_from_samples()
+        title = (
+            self.settings["title"]
+            if self.settings["title"]
+            else self.title_from_samples()
+        )
         ax.set_title(title)
         ax.set_ylabel(self.settings["raw"]["ylabel"])
         ax.set_xlabel(self.settings["raw"]["xlabel"])
@@ -76,7 +85,9 @@ class FiguresGenerator:
         ax.set_xlabel(self.settings["err"]["xlabel"])
         ax.set_ylim(0, self.settings["err"]["ylim"] + 5)
 
-    def make_figure(self, files: list[Path] | None = None, plot: bool = False) -> Figure:
+    def make_figure(
+        self, files: list[Path] | None = None, plot: bool = False
+    ) -> Figure:
         fig, col = plt.subplots(2, 1, constrained_layout=True)
         if files is not None:
             raw_files = [self.RESULTS_RAW / file for file in files]

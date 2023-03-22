@@ -14,18 +14,17 @@ class ResultsManager:
     INITIALDIR = Path(__file__).resolve().parent
     RESULTS_RAW = Path("results/raw")
     RESULTS_ABS_ERR = Path("results/abs_err")
-    SETTINGS = Path("results/mgr_settings.yaml")
     SEP = ";"
 
     def __init__(self) -> None:
         self.args = self.parse_args()
         self.gen: bool = self.args.gen
-        with self.SETTINGS.open(encoding="utf8") as f:
-            self.settings = yaml.safe_load(f)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("-g", "--gen", action="store_true", help="Generates other data")
+        parser.add_argument(
+            "-g", "--gen", action="store_true", help="Generates other data"
+        )
         return parser.parse_args()
 
     def gen_abs_err(self, src: Path, dest: Path) -> None:
@@ -35,7 +34,9 @@ class ResultsManager:
 
             abs_err_file = dest.joinpath(file.name)
             dest.mkdir(parents=True, exist_ok=True)
-            df_abs_err.to_csv(abs_err_file, sep=self.SEP, index=False, header=False)
+            df_abs_err.to_csv(
+                abs_err_file, sep=self.SEP, index=False, header=False
+            )
 
     def run(self):
         if self.gen:
