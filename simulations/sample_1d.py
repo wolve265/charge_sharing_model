@@ -13,14 +13,15 @@ sys.path.append(str(Path(sys.path[0]).parents[0]))
 
 from models.detectors import cdte, si  # used in eval()
 from models.pcs_model_1d import PcsModel1D
+from models.pcs_model_1d_int import PcsModel1DInt
 
 RESULTSDIR = Path("results/raw")
 
 
 @dataclass
 class Sample1D:
-    model: PcsModel1D
-    approx_function: Callable[[PcsModel1D, int], float]
+    model: PcsModel1DInt | PcsModel1D
+    approx_function: Callable[[PcsModel1DInt | PcsModel1D, int], float | int]
     approx_function_param: int
     detector_size_step: int
     times: int
@@ -64,7 +65,7 @@ class Sample1D:
             # charges,
             # noise,
         ) = re_obj.groups()
-        model_type = PcsModel1D if model_dimension == "1D" else None
+        model_type = PcsModel1DInt if model_dimension == "1D" else None
         approx_function = (
             model_type.calc_hit_lut
             if function_name == "lut"
@@ -72,15 +73,25 @@ class Sample1D:
             if function_name == "erfinv"
             else model_type.calc_hit_taylor
         )
-        detector = eval(f"{model_detector_material.lower()}.{model_detector_name}")
+        detector = eval(
+            f"{model_detector_material.lower().removeprefix('int_')}.{model_detector_name}"
+        )
         model = model_type(detector)
         return cls(
-            model, approx_function, int(function_param), int(model_detector_step_size), int(times)
+            model,
+            approx_function,
+            int(function_param),
+            int(model_detector_step_size),
+            int(times),
         )
 
     def to_filename(self) -> str:
         function_type_name = self.approx_function.__name__.split("_")[-1]
-        function_param = str(self.approx_function_param) if self.approx_function_param else ""
+        function_param = (
+            str(self.approx_function_param)
+            if self.approx_function_param
+            else ""
+        )
         function_with_param = f"{function_type_name}{function_param}"
         return "_".join(
             [
@@ -111,7 +122,11 @@ class Sample1D:
 
         for x in self.positions_to_test:
             self.model.hit(x)
-            result = self.approx_function(self.model, self.approx_function_param)
+            result = self.approx_function(
+                self.model, self.approx_function_param
+            )
+            if isinstance(self.model, PcsModel1DInt):
+                result = result // self.model.multiplier
             results.append(f"{result}")
 
         with lock, self.file.open("a") as f:
@@ -127,7 +142,10 @@ class Sample1D:
             - 10_000 -> 2m 5s
         """
         self.create_result_file()
-        chunksize = self.times // processes
+        if self.times > processes:
+            chunksize = self.times // processes
+        else:
+            chunksize = 1
         t = range(self.times)
         with ProcessPoolExecutor() as executor:
             executor.map(self.hit_and_calc, t, chunksize=chunksize)

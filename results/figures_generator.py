@@ -103,11 +103,8 @@ class FiguresGenerator:
         return fig
 
     def run(self):
-        if self.plot:
-            self.make_figure(plot=True)
-            return
         for figure in self.settings["figures"]:
-            fig = self.make_figure(figure["files"])
+            fig = self.make_figure(figure["files"], plot=self.plot)
             fig.savefig(self.FIGURES / figure["name"])
 
 

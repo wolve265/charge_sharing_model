@@ -26,7 +26,11 @@ class PcsModel1D:
         self.charge_cloud_sigma = detector.charge_cloud_sigma
         self.noise_sigma = detector.noise_sigma
         self.pixel_coordinates = list(
-            np.linspace(-self.pixel_size, 2 * self.pixel_size, 3 * self.pixel_size + 1)
+            np.linspace(
+                -self.pixel_size,
+                2 * self.pixel_size,
+                3 * self.pixel_size + 1,
+            )
         )
 
         # Hit
@@ -37,7 +41,12 @@ class PcsModel1D:
         self.probs_pc: list[float] = []
 
         # Matplotlib
-        self.lines_pos = [-self.pixel_size, 0, self.pixel_size, 2 * self.pixel_size]
+        self.lines_pos = [
+            -self.pixel_size,
+            0,
+            self.pixel_size,
+            2 * self.pixel_size,
+        ]
 
     def hit(self, pos: int) -> None:
         self.hit_pos = pos
@@ -90,18 +99,24 @@ class PcsModel1D:
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
         calc_hit_pos: float = 0.0
-        if p1_pc == 0 and p3_pc == 0:
-            p1_pc = 0.0001
+        if p1_pc == p3_pc == 0:
+            calc_hit_pos = self.pixel_size / 2
         if p1_pc > p3_pc:
-            calc_hit_pos = -self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p1_pc - 1)
+            calc_hit_pos = (
+                -self.charge_cloud_sigma
+                * math.sqrt(2)
+                * special.erfinv(2 * p1_pc - 1)
+            )
         else:
             calc_hit_pos = (
-                self.charge_cloud_sigma * math.sqrt(2) * special.erfinv(2 * p3_pc - 1)
+                self.charge_cloud_sigma
+                * math.sqrt(2)
+                * special.erfinv(2 * p3_pc - 1)
                 + self.pixel_size
             )
         return calc_hit_pos
 
-    def erfinv_Taylor(self, probability: float, aprox_order: int) -> float:
+    def erfinv_taylor(self, probability: float, aprox_order: int):
         result: float = 0.0
         c = [1, 1]
         for c_k in range(aprox_order - 1):
@@ -111,24 +126,30 @@ class PcsModel1D:
                 current_c += (c[m] * c[c_k - 1 - m]) / ((m + 1) * (2 * m + 1))
             c.append(current_c)
         for k in range(aprox_order):
-            result += c[k] / (2 * k + 1) * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
+            result += (
+                c[k]
+                / (2 * k + 1)
+                * (math.sqrt(math.pi) * probability / 2) ** (2 * k + 1)
+            )
         return result
 
     def calc_hit_taylor(self, taylor_order: int = 10) -> float:
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
         calc_hit_pos: float = 0.0
-        if p1_pc > p3_pc:
+        if p1_pc == p3_pc == 0:
+            calc_hit_pos = self.pixel_size / 2
+        elif p1_pc > p3_pc:
             calc_hit_pos = (
                 -self.charge_cloud_sigma
                 * math.sqrt(2)
-                * self.erfinv_Taylor(2 * p1_pc - 1, taylor_order)
+                * self.erfinv_taylor(2 * p1_pc - 1, taylor_order)
             )
         else:
             calc_hit_pos = (
                 self.charge_cloud_sigma
                 * math.sqrt(2)
-                * self.erfinv_Taylor(2 * p3_pc - 1, taylor_order)
+                * self.erfinv_taylor(2 * p3_pc - 1, taylor_order)
                 + self.pixel_size
             )
         return calc_hit_pos
@@ -138,9 +159,12 @@ class PcsModel1D:
             return
         # print("[DEBUG] create gauss")
         PcsModel1D.gauss_lut = []
-        pixel_bins = np.linspace(0, self.pixel_size, size)  # podzial pixela na czesci
-        PcsModel1D.gauss_bin_size = pixel_bins[1] - pixel_bins[0]  # najmniejszy krok podzialu
-        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma)  # dystrybuanta
+        # podzial pixela na czesci
+        pixel_bins = np.linspace(0, self.pixel_size, size)
+        # najmniejszy krok podzialu
+        PcsModel1D.gauss_bin_size = pixel_bins[1] - pixel_bins[0]
+        # dystrybuanta
+        cdf = norm.cdf(pixel_bins, 0, self.charge_cloud_sigma)
 
         for cdf_i in cdf:
             PcsModel1D.gauss_lut.append(1 - cdf_i)
@@ -151,7 +175,7 @@ class PcsModel1D:
         p1_pc, p2_pc, p3_pc = self.probs_pc
 
         calc_hit_pos: float = 0.0
-        if p1_pc == p3_pc:
+        if p1_pc == p3_pc == 0:
             calc_hit_pos = self.pixel_size / 2
         elif p1_pc > p3_pc:
             for i, value in enumerate(self.gauss_lut):
