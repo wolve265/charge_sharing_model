@@ -9,7 +9,7 @@ sys.path.append(str(Path(sys.path[0]).parents[0]))
 
 from sample_1d import Sample1D
 
-from models.detectors import cdte, si
+from models.detectors import cdte, si, si_sigma
 from models.pcs_model_1d import PcsModel1D
 from models.pcs_model_1d_int import PcsModel1DInt
 
@@ -20,9 +20,10 @@ model = PcsModel1DInt
 def main():
     samples: list[Sample1D] = []
     # for detector in [si.target]:
-    for detector in si.all + cdte.all:
+    # for detector in si.all + cdte.all:
+    for detector in si_sigma.all:
         # for param in range(1, 50, 1):
-        for param in [25, 50, 75]:
+        for param in [50]:
             samples.append(
                 Sample1D(
                     model=model(detector),

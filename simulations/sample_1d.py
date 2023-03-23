@@ -11,7 +11,7 @@ from filelock import FileLock
 # append charge_sharing_model directory
 sys.path.append(str(Path(sys.path[0]).parents[0]))
 
-from models.detectors import cdte, si  # used in eval()
+from models.detectors import cdte, si, si_sigma  # used in eval()
 from models.pcs_model_1d import PcsModel1D
 from models.pcs_model_1d_int import PcsModel1DInt
 
@@ -39,10 +39,10 @@ class Sample1D:
         file: Path = Path(file)
         pattern = "_".join(
             [
-                "(\d\w)",  # model dimension
+                "(\d\w)(_int)?",  # model dimension
                 "(\w+)",  # model detector material
                 "(\w+)",  # model detector name
-                "(\w+)(\d+)",  # function with param
+                "([a-z]+)(\d+)",  # function with param
                 "step(\d+)",  # model detector step size
                 "times(\d+)",  # times
                 # "size(\d+)",  # model detector pixel size
@@ -54,6 +54,7 @@ class Sample1D:
         re_obj = re.match(pattern, file.stem)
         (
             model_dimension,
+            is_integer,
             model_detector_material,
             model_detector_name,
             function_name,
@@ -65,7 +66,7 @@ class Sample1D:
             # charges,
             # noise,
         ) = re_obj.groups()
-        model_type = PcsModel1DInt if model_dimension == "1D" else None
+        model_type = PcsModel1DInt if is_integer.endswith("int") else PcsModel1D
         approx_function = (
             model_type.calc_hit_lut
             if function_name == "lut"
@@ -74,7 +75,7 @@ class Sample1D:
             else model_type.calc_hit_taylor
         )
         detector = eval(
-            f"{model_detector_material.lower().removeprefix('int_')}.{model_detector_name}"
+            f"{model_detector_material.lower()}.{model_detector_name}"
         )
         model = model_type(detector)
         return cls(
